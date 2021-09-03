@@ -1,11 +1,151 @@
 let config = {
     tableURL: "http://localhost:3000/users/",
     columnNames: ["id", "name", "email"],
-    tableElementID: "userTable"
+    tableElementID: "userTable",
+    getDataButtonID: "getDataBtn"
 };
 
-// GET requests data from server
-function getServerData(url) {
+
+function createTableElementFromDBtable() {
+    getTableRowsFromDB(config.tableURL)
+    .then(rows => fillTableElement(config.tableElementID, rows));
+}
+
+document.querySelector("#"+config.getDataButtonID)
+        .addEventListener("click", createTableElementFromDBtable);
+
+
+function createAnyElement(name, attributes) {
+    let element = document.createElement(name);
+    for (let k in attributes) {
+        element.setAttribute(k, attributes[k]);
+    }
+    return element;
+}
+
+
+function fillTableElement(tableElementID, rows) {
+    let table = document.querySelector('#' + tableElementID);
+    if (!table) {
+        console.error(`Table element with "${tableElementID}" ID is not found in HTML code.`);
+        return;
+    }
+    // add empty input row to table element
+    let tBody = document.querySelector("tbody");
+    tBody.innerHTML = '';
+    let newRow = createEmptyInputRow();
+    tBody.appendChild(newRow);
+    // add data filled input rows to table element
+    for (let row of rows) {
+        newRow = createUpdateInputRow(row);
+        tBody.appendChild(newRow);
+    }
+}
+
+
+function createEmptyInputRow() {
+    let newRow = createAnyElement("tr");
+    for (let columnName of config.columnNames) {
+        let newCell = createAnyElement("td");
+        let input = createAnyElement("input", {
+            class: "form-control",
+            name: columnName
+        });
+        newCell.appendChild(input);
+        newRow.appendChild(newCell);
+    }
+    let newBtn = createAnyElement("button", 
+            { class: "btn btn-success",
+              onclick: "createRow(this)"
+            }
+        );
+
+    newBtn.innerHTML = '<i class="fa fa-plus-circle" aria-hidden="true"></i>';
+
+    let td = createAnyElement("td");
+    td.appendChild(newBtn);
+    newRow.appendChild(td);
+    return newRow;
+}
+
+
+function createUpdateInputRow(row){
+    let newRow = createAnyElement("tr");
+    for (let columnName of config.columnNames) {
+        let td = createAnyElement("td");
+
+        let input = createAnyElement("input", {
+            class: "form-control",
+            name: columnName,
+            value: row[columnName]
+        });
+        if (columnName == "id") {
+            input.setAttribute("readonly", true);
+        }
+
+        td.appendChild(input);
+        newRow.appendChild(td);
+    }
+    let btnGroup = createBtnGroup();
+    newRow.appendChild(btnGroup);
+    return newRow;
+}
+
+
+function createBtnGroup() {
+    let group = createAnyElement("div", { class: "btn btn-group" });
+    let infoBtn = createAnyElement("button", { class: "btn btn-info", onclick: "updateRow(this)" });
+    infoBtn.innerHTML = '<i class="fa fa-edit" aria-hidden="true"></i>';
+    let delBtn = createAnyElement("button", { class: "btn btn-danger", onclick: "deleteRow(this)" });
+    delBtn.innerHTML = '<i class="fa fa-trash" aria-hidden="true"></i>';
+
+    group.appendChild(infoBtn);
+    group.appendChild(delBtn);
+
+    let td = createAnyElement("td");
+    td.appendChild(group);
+    return td;
+}
+
+
+function getRowFromTableElementRow(tr) {
+    let inputs = tr.querySelectorAll("input.form-control");
+    let row = {};
+    for (let i = 0; i < inputs.length; i++) {
+        row[inputs[i].name] = inputs[i].value;
+    }
+    return row;
+}
+
+
+// create new row in DB from input
+function createRow(btn) {
+    let tr = btn.parentElement.parentElement;
+    let row = getRowFromTableElementRow(tr);
+    delete row.id;
+    createTableRowInDB(row)
+    .then(_ => createTableElementFromDBtable())
+}
+
+
+function updateRow(btn) {
+    let tr = btn.parentElement.parentElement.parentElement;
+    let row = getRowFromTableElementRow(tr);
+    updateTableRowInDB(row)
+    .then(_ => createTableElementFromDBtable());
+}
+
+
+function deleteRow(btn) {
+    let tr = btn.parentElement.parentElement.parentElement;
+    let row = getRowFromTableElementRow(tr);
+    deleteTableRowFromDB(row)
+    .then(_ => createTableElementFromDBtable());
+}
+
+
+// GET: requests data rows from DB
+function getTableRowsFromDB(url) {
     let fetchOptions = {
         method: "GET",
         mode: "cors",
@@ -17,120 +157,9 @@ function getServerData(url) {
             );
 }
 
-function startGetRows() {
-    getServerData(config.tableURL)
-    .then(data => fillTableElementWithDataRows(data, config.tableElementID));
-}
-document.querySelector("#getDataBtn").addEventListener("click", startGetRows);
 
-
-function fillTableElementWithDataRows(data, tableElementID) {
-    let table = document.querySelector('#' + tableElementID);
-    if (!table) {
-        console.error(`Table element with "${tableElementID}" ID is not found in HTML source.`);
-        return;
-    }
-    // add new row to table
-    let tBody = document.querySelector("tbody");
-    tBody.innerHTML = '';
-    let newRow = newUserRow();
-    tBody.appendChild(newRow);
-
-
-    for (let row of data) {
-        let newRow = createAnyElement("tr");
-        for (let columnName of config.columnNames) {
-            let td = createAnyElement("td");
-
-            let input = createAnyElement("input", {
-                class: "form-control",
-                value: row[columnName],
-                name: columnName
-            });
-            if (columnName == "id") {
-                input.setAttribute("readonly", true);
-            }
-
-            td.appendChild(input);
-            newRow.appendChild(td);
-        }
-        let btnGroup = createBtnGroup();
-        newRow.appendChild(btnGroup);
-        tBody.appendChild(newRow);
-    }
-}
-
-
-function createAnyElement(name, attributes) {
-    let element = document.createElement(name);
-    for (let k in attributes) {
-        element.setAttribute(k, attributes[k]);
-    }
-    return element;
-}
-
-function createBtnGroup() {
-    let group = createAnyElement("div", { class: "btn btn-group" });
-    let infoBtn = createAnyElement("button", { class: "btn btn-info", onclick: "setRow(this)" });
-    infoBtn.innerHTML = '<i class="fa fa-edit" aria-hidden="true"></i>';
-    let delBtn = createAnyElement("button", { class: "btn btn-danger", onclick: "delRow(this)" });
-    delBtn.innerHTML = '<i class="fa fa-trash" aria-hidden="true"></i>';
-
-    group.appendChild(infoBtn);
-    group.appendChild(delBtn);
-
-    let td = createAnyElement("td");
-    td.appendChild(group);
-    return td;
-}
-
-// DELETE: remove row from table
-function delRow(btn) {
-    let tr = btn.parentElement.parentElement.parentElement;
-    let data = getRowData(tr);
-    let id = data.id;
-    let fetchOptions = {
-        method: "DELETE",
-        mode: "cors",
-        cache: "no-cache"
-    };
-    fetch(`${config.tableURL}${id}`, fetchOptions).then(
-        resp => resp.json(),
-        err => console.error(err)
-    ).then(data => startGetRows());
-}
-
-// create new row
-function newUserRow(row) {
-    let tr = createAnyElement("tr");
-    for (let k of config.columnNames) {
-        let td = createAnyElement("td");
-        let input = createAnyElement("input", {
-            class: "form-control",
-            name: k
-        });
-        td.appendChild(input);
-        tr.appendChild(td);
-    }
-    let newBtn = createAnyElement("button",
-        {
-            class: "btn btn-success",
-            onclick: "createUser(this)"
-        });
-
-    newBtn.innerHTML = '<i class="fa fa-plus-circle" aria-hidden="true"></i>';
-
-    let td = createAnyElement("td");
-    td.appendChild(newBtn);
-    tr.appendChild(td);
-    return tr;
-}
-
-// POST: create new row in DB
-function createUser(btn) {
-    let tr = btn.parentElement.parentElement;
-    let data = getRowData(tr);
-    delete data.id;
+// POST: create data row in DB
+function createTableRowInDB(row){
     let fetchOptions = {
         method: "POST",
         mode: "cors",
@@ -138,40 +167,39 @@ function createUser(btn) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(row)
     };
-
-    fetch(config.tableURL, fetchOptions).then(
-        resp => resp.json(),
-        err => console.error(err)
-    ).then(
-        data => startGetRows()
-    );
+    return fetch(config.tableURL, fetchOptions)
+           .then(resp => resp.json(),
+                 err => console.error(err));
 }
 
-function getRowData(tr) {
-    let inputs = tr.querySelectorAll("input.form-control");
-    let data = {};
-    for (let i = 0; i < inputs.length; i++) {
-        data[inputs[i].name] = inputs[i].value;
-    }
-    return data;
-}
 
-// PUT: update data
-function setRow(btn) {
-    let tr = btn.parentElement.parentElement.parentElement;
-    let data = getRowData(tr);
+// PUT: update data row in DB
+function updateTableRowInDB(row) {
     let fetchOptions = {
-            method: "PUT",
-            mode: "cors",
-            cache: "no-cache",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
+        method: "PUT",
+        mode: "cors",
+        cache: "no-cache",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(row)
     };
-    fetch(`${config.tableURL}${data.id}`, fetchOptions)
-    .then(resp => resp.json(), err => console.error(err))
-    .then(data => startGetRows());
+    return fetch(config.tableURL, fetchOptions)
+           .then(resp => true,
+                 err => console.error(err));
+}
+
+
+// DELETE: remove data row from DB
+function deleteTableRowFromDB(row){
+    let fetchOptions = {
+        method: "DELETE",
+        mode: "cors",
+        cache: "no-cache"
+    };
+    return fetch(config.tableURL + row.id, fetchOptions)
+           .then(resp => true,
+                 err => console.error(err));
 }
