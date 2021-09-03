@@ -37,7 +37,7 @@ function fillTableElement(tableElementID, rows) {
     tBody.appendChild(newRow);
     // add data filled input rows to table element
     for (let row of rows) {
-        newRow = createUpdateInputRow(row);
+        newRow = createFilledInputRow(row);
         tBody.appendChild(newRow);
     }
 }
@@ -69,7 +69,7 @@ function createEmptyInputRow() {
 }
 
 
-function createUpdateInputRow(row){
+function createFilledInputRow(row){
     let newRow = createAnyElement("tr");
     for (let columnName of config.columnNames) {
         let td = createAnyElement("td");
@@ -123,19 +123,21 @@ function createRow(btn) {
     let tr = btn.parentElement.parentElement;
     let row = getRowFromTableElementRow(tr);
     delete row.id;
-    createTableRowInDB(row)
+    modifyTableRowInDB("POST", row)
     .then(_ => createTableElementFromDBtable())
 }
 
 
+// update row in DB from input
 function updateRow(btn) {
     let tr = btn.parentElement.parentElement.parentElement;
     let row = getRowFromTableElementRow(tr);
-    updateTableRowInDB(row)
+    modifyTableRowInDB("PUT", row)
     .then(_ => createTableElementFromDBtable());
 }
 
 
+// delete row in DB from input
 function deleteRow(btn) {
     let tr = btn.parentElement.parentElement.parentElement;
     let row = getRowFromTableElementRow(tr);
@@ -159,9 +161,10 @@ function getTableRowsFromDB(url) {
 
 
 // POST: create data row in DB
-function createTableRowInDB(row){
+// PUT: update data row in DB
+function modifyTableRowInDB(method, row){
     let fetchOptions = {
-        method: "POST",
+        method: method,
         mode: "cors",
         cache: "no-cache",
         headers: {
@@ -170,23 +173,6 @@ function createTableRowInDB(row){
         body: JSON.stringify(row)
     };
     return fetch(config.tableURL, fetchOptions)
-           .then(resp => resp.json(),
-                 err => console.error(err));
-}
-
-
-// PUT: update data row in DB
-function updateTableRowInDB(row) {
-    let fetchOptions = {
-        method: "PUT",
-        mode: "cors",
-        cache: "no-cache",
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(row)
-    };
-    return fetch(config.tableURL + row.id, fetchOptions)
            .then(resp => true,
                  err => console.error(err));
 }
