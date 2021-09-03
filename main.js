@@ -186,7 +186,7 @@ function updateTableRowInDB(row) {
         },
         body: JSON.stringify(row)
     };
-    return fetch(config.tableURL, fetchOptions)
+    return fetch(config.tableURL + row.id, fetchOptions)
            .then(resp => true,
                  err => console.error(err));
 }
