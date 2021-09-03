@@ -1,5 +1,5 @@
 {
-  "name": "User Admin",
+  "name": "ut01-user-admin",
   "version": "1.0.0",
   "description": "User Administration CRUD on NodeJS",
   "main": "index.js",
@@ -16,5 +16,10 @@
   "bugs": {
     "url": "https://github.com/ruszkipista/ut01-user-admin/issues"
   },
-  "homepage": "https://github.com/ruszkipista/ut01-user-admin#readme"
+  "homepage": "https://github.com/ruszkipista/ut01-user-admin#readme",
+  "dependencies": {
+    "@popperjs/core": "^2.10.1",
+    "bootstrap": "^5.1.0",
+    "font-awesome": "^4.7.0"
+  }
 }
