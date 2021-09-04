@@ -2,7 +2,7 @@
   "name": "ut01-user-admin",
   "version": "1.0.0",
   "description": "User Administration CRUD on NodeJS",
-  "main": "index.js",
+  "main": "view.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -11,7 +11,7 @@
     "url": "git+https://github.com/ruszkipista/ut01-user-admin.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "ruszkipista",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/ruszkipista/ut01-user-admin/issues"

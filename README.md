@@ -1,2 +1,6 @@
-# ut01-user-admin
-User Administration CRUD on NodeJS
+# User Administration CRUD on NodeJS json-server
+
+* start the JSON server with
+```BASH
+json-server --watch db.json
+```

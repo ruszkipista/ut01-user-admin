@@ -1,18 +1,16 @@
-let config = {
-    tableURL: "http://localhost:3000/users/",
-    columnNames: ["id", "name", "email"],
+const configView = {
     tableElementID: "userTable",
-    getDataButtonID: "getDataBtn"
+    getDataButtonID: "getDataBtn",
 };
 
 
-function createTableElementFromDBtable() {
-    getTableRowsFromDB(config.tableURL)
-    .then(rows => fillTableElement(config.tableElementID, rows));
+function createTableElementFromUsers() {
+    getUsersFromDB()
+    .then(rows => fillTableElement(configView.tableElementID, rows));
 }
 
-document.querySelector("#"+config.getDataButtonID)
-        .addEventListener("click", createTableElementFromDBtable);
+document.querySelector("#"+configView.getDataButtonID)
+        .addEventListener("click", createTableElementFromUsers);
 
 
 function createAnyElement(name, attributes) {
@@ -45,7 +43,7 @@ function fillTableElement(tableElementID, rows) {
 
 function createEmptyInputRow() {
     let newRow = createAnyElement("tr");
-    for (let columnName of config.columnNames) {
+    for (let columnName of configDB.columnNamesUsers) {
         let newCell = createAnyElement("td");
         let input = createAnyElement("input", {
             class: "form-control",
@@ -56,7 +54,7 @@ function createEmptyInputRow() {
     }
     let newBtn = createAnyElement("button", 
             { class: "btn btn-success",
-              onclick: "createRow(this)"
+              onclick: "createUser(this)"
             }
         );
 
@@ -71,7 +69,7 @@ function createEmptyInputRow() {
 
 function createFilledInputRow(row){
     let newRow = createAnyElement("tr");
-    for (let columnName of config.columnNames) {
+    for (let columnName of configDB.columnNamesUsers) {
         let td = createAnyElement("td");
 
         let input = createAnyElement("input", {
@@ -94,9 +92,9 @@ function createFilledInputRow(row){
 
 function createBtnGroup() {
     let group = createAnyElement("div", { class: "btn btn-group" });
-    let infoBtn = createAnyElement("button", { class: "btn btn-info", onclick: "updateRow(this)" });
+    let infoBtn = createAnyElement("button", { class: "btn btn-info", onclick: "updateUser(this)" });
     infoBtn.innerHTML = '<i class="fa fa-edit" aria-hidden="true"></i>';
-    let delBtn = createAnyElement("button", { class: "btn btn-danger", onclick: "deleteRow(this)" });
+    let delBtn = createAnyElement("button", { class: "btn btn-danger", onclick: "deleteUser(this)" });
     delBtn.innerHTML = '<i class="fa fa-trash" aria-hidden="true"></i>';
 
     group.appendChild(infoBtn);
@@ -119,73 +117,28 @@ function getRowFromTableElementRow(tr) {
 
 
 // create new row in DB from input
-function createRow(btn) {
+function createUser(btn) {
     let tr = btn.parentElement.parentElement;
     let row = getRowFromTableElementRow(tr);
     delete row.id;
-    modifyTableRowInDB("POST", row)
-    .then(_ => createTableElementFromDBtable())
+    createUserInDB(row)
+    .then(_ => createTableElementFromUsers())
 }
 
 
 // update row in DB from input
-function updateRow(btn) {
+function updateUser(btn) {
     let tr = btn.parentElement.parentElement.parentElement;
     let row = getRowFromTableElementRow(tr);
-    modifyTableRowInDB("PUT", row)
-    .then(_ => createTableElementFromDBtable());
+    updateUserInDB(row)
+    .then(_ => createTableElementFromUsers());
 }
 
 
 // delete row in DB from input
-function deleteRow(btn) {
+function deleteUser(btn) {
     let tr = btn.parentElement.parentElement.parentElement;
     let row = getRowFromTableElementRow(tr);
-    deleteTableRowFromDB(row)
-    .then(_ => createTableElementFromDBtable());
-}
-
-
-// GET: requests data rows from DB
-function getTableRowsFromDB(url) {
-    let fetchOptions = {
-        method: "GET",
-        mode: "cors",
-        cache: "no-cache"
-    };
-    return fetch(url, fetchOptions)
-           .then( response => response.json(),
-                  err => console.error(err)
-            );
-}
-
-
-// POST: create data row in DB
-// PUT: update data row in DB
-function modifyTableRowInDB(method, row){
-    let fetchOptions = {
-        method: method,
-        mode: "cors",
-        cache: "no-cache",
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(row)
-    };
-    return fetch(config.tableURL, fetchOptions)
-           .then(resp => true,
-                 err => console.error(err));
-}
-
-
-// DELETE: remove data row from DB
-function deleteTableRowFromDB(row){
-    let fetchOptions = {
-        method: "DELETE",
-        mode: "cors",
-        cache: "no-cache"
-    };
-    return fetch(config.tableURL + row.id, fetchOptions)
-           .then(resp => true,
-                 err => console.error(err));
+    deleteUserFromDB(row)
+    .then(_ => createTableElementFromUsers());
 }
