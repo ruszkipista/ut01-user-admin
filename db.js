@@ -1,23 +1,25 @@
 const configDB = {
-    tableURLusers: "http://localhost:3000/users/",
-    columnNamesUsers: ["id", "name", "email"],
+    users: {
+        tableURL: "http://localhost:3000/users/",
+        columnNames: ["id", "name", "email"],
+    }
 };
 
 // Create
-function createUserInDB(row){
-    return createTableRowInDB(configDB.tableURLusers, row)
+function createRowInDB(entityName, row){
+    return createTableRowInDB(configDB[entityName].tableURL, row)
 }
 // Read
-function getUsersFromDB(){
-    return getTableRowsFromDB(configDB.tableURLusers);
+function getRowsFromDB(entityName){
+    return getTableRowsFromDB(configDB[entityName].tableURL);
 }
 // Update
-function updateUserInDB(row){
-    return updateTableRowInDB(configDB.tableURLusers, row)
+function updateRowInDB(entityName, row){
+    return updateTableRowInDB(configDB[entityName].tableURL, row)
 }
 // Delete
-function deleteUserFromDB(row){
-    return deleteTableRowFromDB(configDB.tableURLusers, row)
+function deleteRowFromDB(entityName, row){
+    return deleteTableRowFromDB(configDB[entityName].tableURL, row)
 }
 
 // POST: creates data row in DB
