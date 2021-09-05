@@ -106,7 +106,7 @@ function createBtnGroup() {
 }
 
 
-function getRowFromTableElementRow(tr) {
+function getRowFromTableRowElement(tr) {
     let inputs = tr.querySelectorAll("input.form-control");
     let row = {};
     for (let i = 0; i < inputs.length; i++) {
@@ -118,18 +118,23 @@ function getRowFromTableElementRow(tr) {
 
 // create new row in DB from input
 function createUser(btn) {
-    let tr = btn.parentElement.parentElement;
-    let row = getRowFromTableElementRow(tr);
+    let trElement = getTrFromBtn(btn);
+    let row = getRowFromTableRowElement(trElement);
     delete row.id;
     createUserInDB(row)
     .then(_ => createTableElementFromUsers())
 }
 
 
+function getTrFromBtn(buttonElement){
+    return buttonElement.parentElement.parentElement;
+}
+
+
 // update row in DB from input
 function updateUser(btn) {
-    let tr = btn.parentElement.parentElement.parentElement;
-    let row = getRowFromTableElementRow(tr);
+    let trElement = getTrFromBtn(btn);
+    let row = getRowFromTableRowElement(trElement);
     updateUserInDB(row)
     .then(_ => createTableElementFromUsers());
 }
@@ -137,8 +142,10 @@ function updateUser(btn) {
 
 // delete row in DB from input
 function deleteUser(btn) {
-    let tr = btn.parentElement.parentElement.parentElement;
-    let row = getRowFromTableElementRow(tr);
-    deleteUserFromDB(row)
-    .then(_ => createTableElementFromUsers());
+    let trElement = getTrFromBtn(btn);
+    let row = getRowFromTableRowElement(trElement);
+    if (confirm("Please confirm the deletion of this user")) {
+        deleteUserFromDB(row)
+        .then(_ => createTableElementFromUsers());
+    }
 }
