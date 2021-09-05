@@ -149,7 +149,7 @@ function updateRow(btn, entityName) {
 function deleteRow(btn, entityName) {
     let trElement = getTrFromBtn(btn);
     let row = getRowFromTableRowElement(trElement);
-    if (confirm("Please confirm the deletion of this row")) {
+    if (confirm(`Please confirm the deletion of row ${row.id}`)) {
         deleteRowFromDB(entityName, row)
         .then(_ => createTableElementFromTableRows(entityName));
     }
