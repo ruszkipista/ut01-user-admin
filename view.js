@@ -1,21 +1,17 @@
 const configView = {
     tableElementID: "dynamicTable",
     getDataButtonID: "getDataBtn",
-    entityName: "users"
 };
 
 
-function createTableElementFromTableRows(event) {
-    entityName = configView.entityName
-    getRowsFromDB(entityName)
-    .then(rows => fillTableElement(entityName, configDB, configView.tableElementID, rows));
+document.querySelector("#"+configView.getDataButtonID)
+        .addEventListener("click", v_clickedGetDataButton);
+
+function v_clickedGetDataButton(event){
+    c_createTableElementFromTableRows();
 }
 
-document.querySelector("#"+configView.getDataButtonID)
-        .addEventListener("click", createTableElementFromTableRows);
-
-
-function createAnyElement(name, attributes) {
+function v_createAnyElement(name, attributes) {
     let element = document.createElement(name);
     for (let k in attributes) {
         element.setAttribute(k, attributes[k]);
@@ -24,30 +20,31 @@ function createAnyElement(name, attributes) {
 }
 
 
-function fillTableElement(entityName, configDB, tableElementID, rows) {
-    let table = document.querySelector('#' + tableElementID);
+function v_fillTableElement(entityName, rows) {
+    tableElementID = configView.tableElementID;
+    const table = document.querySelector('#' + tableElementID);
     if (!table) {
         console.error(`Table element with "${tableElementID}" ID is not found in HTML code.`);
         return;
     }
     // add empty input row to table element
-    let tBody = document.querySelector("tbody");
+    const tBody = document.querySelector("tbody");
     tBody.innerHTML = '';
-    let newRow = createEmptyInputRow(entityName);
+    let newRow = v_createEmptyInputRow(entityName);
     tBody.appendChild(newRow);
     // add data filled input rows to table element
     for (let row of rows) {
-        newRow = createFilledInputRow(entityName, row);
+        newRow = v_createFilledInputRow(entityName, row);
         tBody.appendChild(newRow);
     }
 }
 
 
-function createEmptyInputRow(entityName) {
-    let newRow = createAnyElement("tr");
+function v_createEmptyInputRow(entityName) {
+    let newRow = v_createAnyElement("tr");
     for (let columnName of configDB[entityName].columnNames) {
-        let newCell = createAnyElement("td");
-        let input = createAnyElement("input", {
+        let newCell = v_createAnyElement("td");
+        let input = v_createAnyElement("input", {
             class: "form-control",
             name: columnName
         });
@@ -57,27 +54,27 @@ function createEmptyInputRow(entityName) {
         newCell.appendChild(input);
         newRow.appendChild(newCell);
     }
-    let newBtn = createAnyElement("button", 
+    let newBtn = v_createAnyElement("button", 
             { class: "btn btn-success",
-              onclick: `createRow(this,\'${entityName}\')`
+              onclick: `v_createRow(this,\'${entityName}\')`
             }
         );
 
     newBtn.innerHTML = '<i class="fa fa-plus-circle" aria-hidden="true"></i>';
 
-    let td = createAnyElement("td");
+    let td = v_createAnyElement("td");
     td.appendChild(newBtn);
     newRow.appendChild(td);
     return newRow;
 }
 
 
-function createFilledInputRow(entityName, row){
-    let newRow = createAnyElement("tr");
+function v_createFilledInputRow(entityName, row){
+    let newRow = v_createAnyElement("tr");
     for (let columnName of configDB[entityName].columnNames) {
-        let td = createAnyElement("td");
+        let td = v_createAnyElement("td");
 
-        let input = createAnyElement("input", {
+        let input = v_createAnyElement("input", {
             class: "form-control",
             name: columnName,
             value: row[columnName]
@@ -89,29 +86,29 @@ function createFilledInputRow(entityName, row){
         td.appendChild(input);
         newRow.appendChild(td);
     }
-    let btnGroup = createBtnGroup(entityName);
+    let btnGroup = v_createBtnGroup(entityName);
     newRow.appendChild(btnGroup);
     return newRow;
 }
 
 
-function createBtnGroup(entityName) {
-    let group = createAnyElement("div", { class: "btn btn-group" });
-    let infoBtn = createAnyElement("button", { class: "btn btn-info", onclick: `updateRow(this,\'${entityName}\')` });
+function v_createBtnGroup(entityName) {
+    let group = v_createAnyElement("div", { class: "btn btn-group" });
+    let infoBtn = v_createAnyElement("button", { class: "btn btn-info", onclick: `v_updateRow(this,\'${entityName}\')` });
     infoBtn.innerHTML = '<i class="fa fa-edit" aria-hidden="true"></i>';
-    let delBtn = createAnyElement("button", { class: "btn btn-danger", onclick: `deleteRow(this,\'${entityName}\')` });
+    let delBtn = v_createAnyElement("button", { class: "btn btn-danger", onclick: `v_deleteRow(this,\'${entityName}\')` });
     delBtn.innerHTML = '<i class="fa fa-trash" aria-hidden="true"></i>';
 
     group.appendChild(infoBtn);
     group.appendChild(delBtn);
 
-    let td = createAnyElement("td");
+    let td = v_createAnyElement("td");
     td.appendChild(group);
     return td;
 }
 
 
-function getRowFromTableRowElement(tr) {
+function v_getRowFromTRelement(tr) {
     let inputs = tr.querySelectorAll("input.form-control");
     let row = {};
     for (let i = 0; i < inputs.length; i++) {
@@ -121,36 +118,27 @@ function getRowFromTableRowElement(tr) {
 }
 
 
-// create new row in DB from input
-function createRow(btn, entityName) {
+// create new row from input
+function v_createRow(btn, entityName){
     let trElement = btn.parentElement.parentElement;
-    let row = getRowFromTableRowElement(trElement);
-    delete row.id;
-    createRowInDB(entityName, row)
-    .then(_ => createTableElementFromTableRows(entityName))
+    let row = v_getRowFromTRelement(trElement);
+    c_createRow(row, entityName);
 }
 
 
-function getTrFromBtn(buttonElement){
-    return buttonElement.parentElement.parentElement.parentElement;
+// update row from input
+function v_updateRow(btn, entityName) {
+    let trElement = btn.parentElement.parentElement.parentElement;
+    let row = v_getRowFromTRelement(trElement);
+    c_updateRow(row, entityName);
 }
 
 
-// update row in DB from input
-function updateRow(btn, entityName) {
-    let trElement = getTrFromBtn(btn);
-    let row = getRowFromTableRowElement(trElement);
-    updateRowInDB(entityName, row)
-    .then(_ => createTableElementFromTableRows(entityName));
-}
-
-
-// delete row in DB from input
-function deleteRow(btn, entityName) {
-    let trElement = getTrFromBtn(btn);
-    let row = getRowFromTableRowElement(trElement);
+// delete row from input
+function v_deleteRow(btn, entityName) {
+    let trElement = btn.parentElement.parentElement.parentElement;
+    let row = v_getRowFromTRelement(trElement);
     if (confirm(`Please confirm the deletion of row ${row.id}`)) {
-        deleteRowFromDB(entityName, row)
-        .then(_ => createTableElementFromTableRows(entityName));
+        c_deleteRow(row, entityName);
     }
 }

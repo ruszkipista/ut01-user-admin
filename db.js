@@ -5,25 +5,8 @@ const configDB = {
     }
 };
 
-// Create
-function createRowInDB(entityName, row){
-    return createTableRowInDB(configDB[entityName].tableURL, row)
-}
-// Read
-function getRowsFromDB(entityName){
-    return getTableRowsFromDB(configDB[entityName].tableURL);
-}
-// Update
-function updateRowInDB(entityName, row){
-    return updateTableRowInDB(configDB[entityName].tableURL, row)
-}
-// Delete
-function deleteRowFromDB(entityName, row){
-    return deleteTableRowFromDB(configDB[entityName].tableURL, row)
-}
-
 // POST: creates data row in DB
-function createTableRowInDB(url, row){
+function db_createTableRow(entityName, row){
     let fetchOptions = {
         method: "POST",
         mode: "cors",
@@ -33,20 +16,20 @@ function createTableRowInDB(url, row){
         },
         body: JSON.stringify(row)
     };
-    return fetch(url, fetchOptions)
+    return fetch(configDB[entityName].tableURL, fetchOptions)
            .then(resp => true,
                  err => console.error(err));
 }
 
 
 // GET: reads data rows from DB
-function getTableRowsFromDB(url) {
+function db_getTableRows(entityName) {
     let fetchOptions = {
         method: "GET",
         mode: "cors",
         cache: "no-cache"
     };
-    return fetch(url, fetchOptions)
+    return fetch(configDB[entityName].tableURL, fetchOptions)
            .then( response => response.json(),
                   err => console.error(err)
             );
@@ -54,7 +37,7 @@ function getTableRowsFromDB(url) {
 
 
 // PUT: updates data row in DB
-function updateTableRowInDB(url, row){
+function db_updateTableRow(entityName, row){
     let fetchOptions = {
         method: "PUT",
         mode: "cors",
@@ -64,19 +47,19 @@ function updateTableRowInDB(url, row){
         },
         body: JSON.stringify(row)
     };
-    return fetch(url+row.id, fetchOptions)
+    return fetch(configDB[entityName].tableURL + row.id, fetchOptions)
            .then(resp => true,
                  err => console.error(err));
 }
 
 // DELETE: removes data row from DB
-function deleteTableRowFromDB(url, row){
+function db_deleteTableRow(entityName, row){
     let fetchOptions = {
         method: "DELETE",
         mode: "cors",
         cache: "no-cache"
     };
-    return fetch(url + row.id, fetchOptions)
+    return fetch(configDB[entityName].tableURL + row.id, fetchOptions)
            .then(resp => true,
                  err => console.error(err));
 }

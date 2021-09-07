@@ -2,7 +2,7 @@
   "name": "ut01-user-admin",
   "version": "1.0.0",
   "description": "User Administration CRUD on NodeJS",
-  "main": "view.js",
+  "main": "controller.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
